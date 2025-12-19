@@ -65,7 +65,7 @@ development_status:
       merged_at: "2025-12-19T12:30:00Z"
 
   1-3-build-desktop-menu-management-ui:
-    status: backlog
+    status: ready-for-dev
     git:
       branch: null
       commits: 0
@@ -75,7 +75,7 @@ development_status:
       merged_at: null
 
   1-4-create-orders-database-schema-and-manual-order-entry-api:
-    status: backlog
+    status: ready-for-dev
     git:
       branch: null
       commits: 0
