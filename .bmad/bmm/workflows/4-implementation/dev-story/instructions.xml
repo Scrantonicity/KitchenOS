@@ -12,6 +12,104 @@
   <critical>Do NOT schedule a "next session" or request review pauses unless a HALT condition applies. Only Step 6 decides completion.</critical>
   <critical>User skill level ({user_skill_level}) affects conversation style ONLY, not code updates.</critical>
 
+  <step n="0" goal="Git branch setup and validation" tag="git-setup">
+    <critical>Create and switch to story branch before beginning development</critical>
+    <critical>Update sprint-status.yaml with git metadata</critical>
+
+    <action>Check current git status using: git status --porcelain</action>
+
+    <check if="working directory has uncommitted changes">
+      <output>⚠️ **Working Directory Not Clean**
+
+        You have uncommitted changes. Please commit or stash them before starting a new story.
+
+        Run: git status
+      </output>
+      <action>HALT - Working directory must be clean before creating story branch</action>
+    </check>
+
+    <action>Get current branch using: git branch --show-current</action>
+
+    <check if="not on main branch">
+      <output>⚠️ **Not on Main Branch**
+
+        Current branch: {{current_branch}}
+
+        Story branches should be created from main. Switch to main first:
+        git checkout main
+        git pull origin main
+      </output>
+      <ask>Would you like me to switch to main and pull latest changes? (yes/no)</ask>
+
+      <check if="user confirms">
+        <action>Execute: git checkout main</action>
+        <action>Execute: git pull origin main</action>
+        <output>✓ Switched to main and pulled latest changes</output>
+      </check>
+
+      <check if="user declines">
+        <action>HALT - Must be on main branch to create story branch</action>
+      </check>
+    </check>
+
+    <check if="on main branch">
+      <action>Execute: git pull origin main</action>
+      <output>✓ Main branch is up to date</output>
+    </check>
+
+    <!-- Story discovery happens in Step 1, but we need story info for branch name -->
+    <action>Load {{sprint_status}} to find ready-for-dev story</action>
+    <action>Extract story_key (e.g., "1-2-menu-database-schema") from first ready-for-dev story</action>
+
+    <check if="no ready-for-dev story found">
+      <output>📋 No ready-for-dev story found. Cannot create git branch without a story.</output>
+      <action>Skip git branch creation - continue to Step 1 for story discovery</action>
+      <goto>step with n="1"</goto>
+    </check>
+
+    <check if="ready-for-dev story found">
+      <action>Parse story_key to extract: epic number, story number, description</action>
+      <action>Generate branch name: {epic}/{story}-{description}</action>
+      <action example="1-2-menu-database-schema">Branch name: 1/2-menu-database-schema</action>
+
+      <output>🌿 **Creating Story Branch**
+
+        Story: {{story_key}}
+        Branch: {{branch_name}}
+      </output>
+
+      <action>Execute: git checkout -b {{branch_name}}</action>
+      <output>✓ Created and switched to branch: {{branch_name}}</output>
+
+      <!-- Update sprint-status.yaml with git metadata -->
+      <action>Read current sprint-status.yaml</action>
+      <action>Find story entry matching {{story_key}}</action>
+      <action>Update story's git metadata:
+        - branch: {{branch_name}}
+        - commits: 0
+        - pr_url: null
+        - last_commit_sha: null
+        - created_at: {{current_timestamp_iso}}
+        - merged_at: null
+      </action>
+      <action>Write updated sprint-status.yaml</action>
+
+      <output>✓ Updated sprint-status.yaml with git metadata</output>
+
+      <output>📝 **Git Branch Ready**
+
+        You're now on branch: {{branch_name}}
+        All commits will follow the format: {epic}-{story}: description
+
+        Pre-commit hooks will:
+        - Validate branch name
+        - Run ESLint
+        - Run TypeScript build
+        - Validate commit message format
+      </output>
+    </check>
+  </step>
+
   <step n="1" goal="Find next ready story and load it" tag="sprint-status">
     <check if="{{story_path}} is provided">
       <action>Use {{story_path}} directly</action>
@@ -338,6 +436,77 @@
       - Change Log includes summary of changes
       - Only permitted story sections were modified
     </action>
+
+    <!-- Git Commit Phase -->
+    <action>Parse {{story_key}} to extract epic and story numbers</action>
+    <action>Read story file to extract:
+      - Story title
+      - Completed tasks/subtasks (all [x] items)
+      - Acceptance criteria
+    </action>
+
+    <action>Generate standardized commit message:
+      Format: {epic}-{story}: {Brief description}
+
+      Story {epic}.{story}: {Full story title}
+
+      Completed:
+      - {Task 1}
+      - {Task 2}
+      - {Task 3}
+
+      Acceptance Criteria: PASSING
+      - {AC 1} ✓
+      - {AC 2} ✓
+      - {AC 3} ✓
+
+      🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+      Co-Authored-By: Claude Sonnet 4.5 &lt;noreply@anthropic.com&gt;
+    </action>
+
+    <output>📝 **Creating Git Commit**
+
+      Staging all changes and creating commit...
+    </output>
+
+    <action>Execute: git add .</action>
+    <action>Create commit using generated message (use heredoc for proper formatting)</action>
+    <action>Example command: git commit -m "$(cat &lt;&lt;'EOF'
+      {generated_commit_message}
+      EOF
+      )"
+    </action>
+
+    <output>✓ Commit created successfully</output>
+
+    <!-- Update git metadata in sprint-status.yaml -->
+    <action>Get commit count for current branch: git rev-list --count HEAD</action>
+    <action>Get last commit SHA: git rev-parse --short=7 HEAD</action>
+
+    <action>Load {{sprint_status}}</action>
+    <action>Find story entry matching {{story_key}}</action>
+    <action>Update story's git metadata:
+      - commits: {{commit_count}}
+      - last_commit_sha: {{last_commit_sha}}
+    </action>
+    <action>Save updated sprint-status.yaml</action>
+
+    <output>✓ Updated git metadata in sprint-status.yaml</output>
+
+    <ask>Would you like to push this branch to remote? (yes/no)</ask>
+
+    <check if="user confirms push">
+      <action>Get current branch name: git branch --show-current</action>
+      <action>Execute: git push -u origin {{current_branch}}</action>
+      <output>✓ Pushed to remote: origin/{{current_branch}}</output>
+    </check>
+
+    <check if="user declines push">
+      <output>ℹ️ Branch not pushed. You can push later with:
+        git push -u origin {{current_branch}}
+      </output>
+    </check>
 
     <!-- Mark story ready for review - sprint status conditional -->
     <check if="{sprint_status} file exists AND {{current_sprint_status}} != 'no-sprint-tracking'">

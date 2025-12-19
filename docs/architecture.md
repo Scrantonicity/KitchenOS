@@ -3,11 +3,13 @@ stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8]
 inputDocuments:
   - /Users/harel/Desktop/projects/lacomida-bot/kitchenos/docs/archive/PRD.md
   - /Users/harel/Desktop/projects/lacomida-bot/kitchenos/docs/analysis/product-brief-kitchenos-2025-12-12.md
+  - /Users/harel/Desktop/projects/lacomida-bot/kitchenos/docs/ux-design-specification.md
 workflowType: 'architecture'
 lastStep: 8
 status: 'complete'
 completedAt: '2025-12-13'
-architecture_version: '1.0.0'
+architecture_version: '1.1.0'
+ux_integration_date: '2025-12-14'
 project_name: 'kitchenos'
 user_name: 'Harel'
 date: '2025-12-13'
@@ -75,7 +77,14 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 - Order status updates propagate instantly across tablet + TV + desktop
 - Inventory changes visible immediately
 - Supabase Realtime Channels for pub/sub architecture
-- Sub-second update latency
+- **Performance targets** (from UX spec "Performance as Theater"):
+  - <100ms ideal latency for tablet → TV sync (seamless "choreographed status dance")
+  - 500ms acceptable (show subtle shimmer indicator)
+  - Shimmer timeout strategy:
+    - 0-150ms: No indicator (instant feel)
+    - 150-500ms: Subtle shimmer animation (0.7-1.0 opacity)
+    - >500ms: Clear "syncing" indicator
+  - Graceful degradation: <100ms ideal → 500ms good → offline queue acceptable
 
 **Connectivity Strategy (MVP):**
 - **WiFi reliability**: Nice-to-have, not critical (WiFi has never crashed before)
@@ -85,8 +94,10 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 - No complex offline-first machinery for MVP
 
 **Touch-Optimized UX:**
-- Minimum 48px touch targets (for "flour-covered fingers")
-- Landscape tablet layout (optimized for kitchen counter placement)
+- **44px × 44px minimum touch targets** (WCAG 2.1 Level AAA - optimized for elderly users like Malka)
+- **Portrait tablet layout** (768px × 1024px) - primary orientation with landscape warning prompt
+- **8px minimum spacing** between interactive elements (forgiving touch zones)
+- **Entire card tappable** - not just small buttons, reduces precision requirements
 - Hebrew RTL interface throughout
 - Large, clear typography (body 16px minimum, buttons 18px)
 - Gesture support (swipe, long-press, pull-to-refresh)
@@ -819,7 +830,8 @@ kitchenos/
 
 **Component Architecture: Shadcn/ui with Touch-Optimized Variants**
 - **Already established in Starter Template**
-- Custom variants for touch:
+- **UX Update (2025-12-14)**: 8 custom components designed (see "Component Architecture Details" section for complete specifications)
+- Custom variants for touch (updated to 44px minimum from UX spec):
   ```typescript
   // components/ui/button.tsx (customized)
   const buttonVariants = cva(
@@ -827,9 +839,9 @@ kitchenos/
     {
       variants: {
         size: {
-          default: "h-14 px-6 py-4", // 56px height = touch-friendly
-          lg: "h-16 px-8 py-5",      // 64px for primary actions
-          icon: "h-12 w-12"          // 48px minimum
+          default: "h-11 px-6 py-4", // 44px height = WCAG AAA touch-friendly
+          lg: "h-14 px-8 py-5",      // 56px for primary actions
+          icon: "h-11 w-11"          // 44px minimum
         }
       }
     }
@@ -866,6 +878,407 @@ kitchenos/
 - Automatic route-based code splitting
 - Tree shaking eliminates unused code
 - No additional configuration required for MVP
+
+---
+
+### Visual Design Standards
+
+**Integrated from UX Design Specification (2025-12-14)**
+
+**Color Palette: Classic Kanban Theater**
+
+Order status colors use semantic color coding with high contrast for customer visibility:
+
+```css
+/* Status Colors - HSL format for easy manipulation */
+--color-status-new: hsl(0 0% 85%);          /* Gray - neutral waiting state */
+--color-status-started: hsl(217 91% 85%);   /* Blue - in progress */
+--color-status-ready: hsl(25 95% 85%);      /* Orange - attention needed */
+--color-status-complete: hsl(142 76% 85%); /* Green - success */
+
+/* Background variants (lighter) */
+--color-status-new-bg: hsl(0 0% 99%);
+--color-status-started-bg: hsl(217 91% 98%);
+--color-status-ready-bg: hsl(25 95% 98%);
+--color-status-complete-bg: hsl(142 76% 98%);
+```
+
+**Color Semantics:**
+- **Gray (New)**: Neutral, low urgency - order just received
+- **Blue (Started)**: Active work in progress - packing team engaged
+- **Orange (Ready)**: High attention - order ready for payment/pickup (includes pulse animation)
+- **Green (Complete)**: Success state - order paid and collected
+
+**Accessibility Compliance:**
+- All text-to-background combinations meet WCAG AA 4.5:1 contrast minimum
+- UI components (borders, icons) meet 3:1 contrast minimum
+- Never rely on color alone - redundant encoding (color + text + icon)
+
+**Typography:**
+
+```css
+/* Font Stack */
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+/* Type Scale */
+--font-size-xs: 0.75rem;   /* 12px */
+--font-size-sm: 0.875rem;  /* 14px */
+--font-size-base: 1rem;    /* 16px - minimum body text */
+--font-size-lg: 1.125rem;  /* 18px - button text */
+--font-size-xl: 1.25rem;   /* 20px */
+--font-size-2xl: 1.5rem;   /* 24px - TV minimum */
+--font-size-3xl: 1.875rem; /* 30px */
+--font-size-4xl: 2.25rem;  /* 36px */
+```
+
+**Typography Rules:**
+- **Minimum body text**: 16px (1rem) for readability
+- **Button text**: 18px (1.125rem) for tap targets
+- **TV display**: 24px (1.5rem) minimum for customer viewing at 3-6 feet
+- **Inter font**: Clean, legible sans-serif with excellent Hebrew support
+
+**Spacing System: 8px Base Grid**
+
+```css
+/* Spacing Scale (8px increments) */
+--spacing-1: 0.5rem;  /* 8px */
+--spacing-2: 1rem;    /* 16px */
+--spacing-3: 1.5rem;  /* 24px */
+--spacing-4: 2rem;    /* 32px */
+--spacing-5: 2.5rem;  /* 40px */
+--spacing-6: 3rem;    /* 48px */
+```
+
+**Spacing Rules:**
+- **8px minimum** between interactive elements (forgiving touch zones)
+- **16px** for card padding
+- **24px** for section spacing
+- **44px** for touch target minimum height/width
+- All spacing must be multiples of 8px for consistency
+
+**Reference:**
+For complete visual design specifications including component mockups, color theme visualizer, and design direction rationale, see:
+- `/docs/ux-design-specification.md` - Section: "Visual Design Foundation"
+- `/docs/ux-color-themes.html` - Interactive color palette visualizer
+- `/docs/ux-design-directions.html` - Design direction mockups
+
+---
+
+### Component Architecture Details
+
+**Foundation: shadcn/ui + 8 Custom Components**
+
+**shadcn/ui Base Components (Available):**
+- Button, Card, Badge, Input, Tabs, Dialog/Modal, Toast/Sonner, Skeleton, Scroll Area
+
+**8 Custom Components (KitchenOS-Specific):**
+
+1. **KanbanBoard** - Horizontal scroll-snap container
+   - Purpose: Root component for tablet packing station
+   - Anatomy: Flex container with `scroll-snap-type: x mandatory`
+   - States: Default, Scrolling, Density modes (compact/normal/spacious)
+   - Touch: Swipe left/right with momentum, snap to column
+   - Accessibility: Keyboard Left/Right arrow navigation
+
+2. **OrderCard** - Multi-state card with shimmer sync animation
+   - Purpose: Individual order display with status-specific styling
+   - States: New (gray), Started (blue), Ready (orange pulse), Complete (green), Syncing (shimmer 0.7-1.0 opacity)
+   - Touch: Entire card tappable (not just button), 44px minimum height
+   - Accessibility: ARIA labels, screen reader announcements on status change
+
+3. **KanbanColumn** - Column header with dynamic count badges
+   - Purpose: Vertical container with fixed column positions
+   - Anatomy: Header + count badge + scrollable card list
+   - Accessibility: Announces "New orders column, 3 items"
+
+4. **TVOrderDisplay** - Large-format order card for 40" TV viewing
+   - Purpose: Customer-facing public display (sanitized data)
+   - Typography: 24px minimum for 3-6 feet viewing distance
+   - Layout: Grid layout (3-4 columns) vs tablet single-column Kanban
+   - Privacy: Order number + first name only (no prices, full names)
+
+5. **SyncIndicator** - Real-time WebSocket status visualization
+   - Purpose: Connection status (green/yellow/red dot)
+   - States: Connected (green), Degraded (yellow), Offline (red + offline queue indicator)
+   - Placement: Header, unobtrusive
+
+6. **StatusButton** - Touch-optimized action buttons
+   - Purpose: Primary actions (Start Packing, Mark Ready, etc.)
+   - Touch: 44px × 44px minimum, 500ms debounce prevents double-tap
+   - Variants: Primary (full-width on tablet), Secondary (outline)
+
+7. **TimeElapsed** - Monospace time display with color escalation
+   - Purpose: Order age indicator with urgency signaling
+   - Color escalation: 0-10min gray, 10-20min amber, 20+ amber with ⏱️ icon
+   - Accessibility: Never use red (anxiety management)
+
+8. **OfflineQueueIndicator** - Network state management UI
+   - Purpose: Show queued actions during offline periods
+   - Display: Count of pending mutations, exponential backoff retry status
+   - Accessibility: Clear messaging "3 updates queued, reconnecting..."
+
+**Component Implementation Roadmap:**
+
+**Phase 1 (Week 1-2): Core Flow Components**
+- KanbanBoard, OrderCard, KanbanColumn
+- Critical path: Enables basic order workflow
+
+**Phase 2 (Week 3): Real-Time Sync Components**
+- SyncIndicator, TVOrderDisplay
+- Enables tablet ↔ TV synchronization theater
+
+**Phase 3 (Week 4): Resilience Components**
+- OfflineQueueIndicator, TimeElapsed
+- Graceful degradation and urgency management
+
+**Phase 4 (Week 5+): Enhancement Components**
+- Polish animations, haptic feedback, micro-interactions
+- CSS transitions, shimmer effects, satisfying status dance
+
+**Implementation Pattern:**
+```typescript
+// All custom components built by extending shadcn/ui primitives
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+
+// Custom OrderCard extends base Card with status variants
+export function OrderCard({ order, status }: OrderCardProps) {
+  return (
+    <Card className={cn(
+      "min-h-[44px]", // Touch target minimum
+      statusVariants[status], // Status-specific styling
+      isSyncing && "animate-shimmer" // Sync animation
+    )}>
+      {/* Card content */}
+    </Card>
+  )
+}
+```
+
+**Reference:**
+For complete component specifications including anatomy, states, variants, accessibility, and implementation examples, see:
+- `/docs/ux-design-specification.md` - Section: "Component Strategy"
+
+---
+
+### Accessibility Standards
+
+**WCAG AA Compliance (Industry Standard)**
+
+**Compliance Level:** WCAG 2.1 Level AA (industry standard for good UX)
+
+**Color Contrast:**
+- **Text contrast**: 4.5:1 minimum for normal text
+- **UI component contrast**: 3:1 minimum for borders, icons, interactive elements
+- **Redundant encoding**: Never rely on color alone - always combine:
+  - Color (gray/blue/orange/green status)
+  - Text labels ("New", "Started", "Ready", "Complete")
+  - Icons (✓, ⏳, ⚠️, 🟢)
+- **High contrast mode**: Windows/iOS high contrast settings respected via media queries
+
+**Touch Accessibility (Elderly-User Optimized):**
+- **44px × 44px minimum tap targets** (WCAG 2.1 Level AAA - exceeds Level AA 24px requirement)
+- **8px minimum spacing** between interactive elements
+- **Entire card tappable** - not just tiny buttons (reduces precision requirements for Malka, 80 years old)
+- **Forgiving hit zones** - touch slightly outside card edge still registers
+- **500ms debounce** on status buttons prevents accidental double-tap
+
+**Keyboard Navigation:**
+- **Full keyboard support**: Tab/Shift+Tab through all interactive elements
+- **Visible focus indicators**: 2px blue outline on focused elements
+- **Skip links**: "Skip to main content" for screen readers
+- **No keyboard traps**: Can always Tab out of modals/dialogs
+- **Logical tab order**: Follows visual flow (left-to-right columns, top-to-bottom cards)
+
+**Screen Reader Support:**
+- **Semantic HTML**: `<button>`, `<nav>`, `<main>`, `<article>`, `<section>` elements
+- **ARIA labels**: `aria-label="Mark order #1234 as Ready"`
+- **ARIA live regions**: `aria-live="polite"` for order status updates (non-disruptive announcements)
+- **Alt text**: All icons have descriptive alt text
+- **Announcements**: "Order #1234 moved to Ready column"
+
+**Visual Accessibility:**
+- **Zoom support**: Interface works at 200% browser zoom
+- **No text in images**: All text rendered as HTML text (screen reader accessible)
+- **Readable fonts**: Inter font, 16px minimum body text
+- **No time-based interactions**: No auto-advancing carousels or auto-dismissing toasts
+
+**Hebrew RTL Support:**
+- **Full RTL layout**: `dir="rtl"` attribute with mirrored UI chrome
+- **Logical CSS properties**: `margin-inline-start` instead of `margin-left`
+- **Text alignment**: Automatic text-align based on language direction
+- **Number formatting**: Maintain LTR for numbers (e.g., prices remain "50.00 ₪" not "₪ 00.05")
+
+**Reduced Motion Support:**
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+**High Contrast Support:**
+```css
+@media (prefers-contrast: high) {
+  .order-card {
+    border-width: 2px; /* Thicker borders */
+    --shadow: none; /* Remove subtle shadows */
+  }
+}
+```
+
+**Accessibility Testing Checklist:**
+- ✅ axe DevTools automated WCAG AA scan on every build
+- ✅ Lighthouse accessibility score maintain 95+ score
+- ✅ VoiceOver (iOS) screen reader testing on iPad
+- ✅ Keyboard-only workflow (complete order flow without touch)
+- ✅ Color contrast checker validation
+- ✅ Test with Malka (80 years old) - real user validation
+- ✅ Hebrew speaker testing for RTL layout
+
+**Reference:**
+For complete accessibility requirements including testing strategy, implementation examples, and ARIA patterns, see:
+- `/docs/ux-design-specification.md` - Section: "Responsive Design & Accessibility"
+
+---
+
+### Responsive Breakpoint Strategy
+
+**Design Philosophy: Portrait-First, Not Mobile-First**
+
+KitchenOS is optimized for the **768px × 1024px portrait tablet** (iPad 10.2") as the primary device, with TV display as secondary. Mobile phones are intentionally unsupported.
+
+**Breakpoints:**
+
+**1. Portrait Tablet (Primary Device: 768px × 1024px)**
+```css
+@media (min-width: 768px) and (max-width: 834px) and (orientation: portrait) {
+  /* Optimized Kanban layout */
+  .kanban-board {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .kanban-column {
+    width: clamp(240px, 30vw, 320px);
+    scroll-snap-align: start;
+  }
+}
+```
+
+**Layout:**
+- Single-column horizontal Kanban with scroll-snap
+- Full-screen utilization (no wasted space on 10.2" screen)
+- 44px minimum tap targets throughout
+- 8px minimum spacing between interactive elements
+
+**2. Landscape Tablet (Warning State)**
+```css
+@media (min-width: 768px) and (orientation: landscape) {
+  /* Show rotation prompt */
+  .landscape-warning {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    font-size: 24px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+}
+```
+
+**Message:** "Please rotate to portrait mode for optimal experience"
+
+**3. TV Display (40" 1080p: 1920px × 1080px)**
+```css
+@media (min-width: 1920px) {
+  /* Grid layout for public viewing */
+  .tv-order-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 24px;
+  }
+
+  .tv-order-card {
+    font-size: 24px; /* Minimum for 3-6 feet viewing */
+    padding: 32px;
+  }
+}
+```
+
+**Layout:**
+- Grid layout (3-4 columns showing orders simultaneously)
+- Large typography (24px minimum for customer visibility)
+- High contrast (dark background, bright text)
+- Auto-update (no interaction, pure display mode)
+- Screensaver mode when idle >2 minutes
+
+**4. Desktop Fallback (>1024px)**
+- Not optimized - system designed for tablet workflow
+- Show advisory message: "KitchenOS works best on iPad in portrait mode"
+- Degraded experience acceptable - desktop is not a primary use case
+- Yaron uses desktop for manual order entry only (minimal UI requirements)
+
+**5. Mobile (Unsupported: <767px)**
+```css
+@media (max-width: 767px) {
+  /* Show unsupported message */
+  body::before {
+    content: "Please use iPad in portrait mode";
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background: white;
+    font-size: 18px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Hide app content */
+  #app {
+    display: none;
+  }
+}
+```
+
+**Message:** "KitchenOS requires iPad (10.2" or larger) in portrait mode"
+
+**Device Testing Strategy:**
+- **iPad 10.2" (2021)** - primary device, portrait mode only
+- **iPad Air (2022)** - 10.9" variant testing
+- **40" Samsung Smart TV** - public display testing (Tizen/webOS browser)
+- **Rotation testing** - ensure landscape warning works
+- **Physical device only** - no emulator testing for production validation
+
+**Browser Support:**
+- **Safari (iOS 15+)** - primary browser on iPad
+- **Chrome (latest)** - fallback browser
+- **TV browser (Tizen/webOS)** - public display compatibility
+- **Firefox/Edge** - not prioritized (tablet Safari is primary)
+
+**CSS Implementation Pattern:**
+```typescript
+// Tailwind CSS responsive utilities
+<div className={cn(
+  "flex flex-col", // Mobile fallback (never seen in production)
+  "portrait:flex-row portrait:overflow-x-auto", // Portrait tablet
+  "landscape:hidden", // Hide in landscape (show warning instead)
+  "2xl:grid 2xl:grid-cols-4" // TV display grid
+)}>
+```
+
+**Reference:**
+For complete responsive strategy including testing protocols and implementation examples, see:
+- `/docs/ux-design-specification.md` - Section: "Responsive Design & Accessibility"
 
 ---
 
@@ -2091,6 +2504,378 @@ If a pattern needs to change:
 3. Refactor all existing code
 4. Update tests
 5. Document migration in commit message
+
+---
+
+### UX Pattern Implementation Rules
+
+**Integrated from UX Design Specification (2025-12-14)**
+
+These UX patterns ensure consistent implementation of user experience across all features. AI agents implementing UI features MUST follow these patterns to prevent UX conflicts.
+
+**Critical UX Conflict Points:** 6 pattern categories where implementation consistency is critical for user experience.
+
+---
+
+#### Button Hierarchy Pattern
+
+**Primary Actions:**
+```typescript
+// ✅ CORRECT - Blue primary button, 44px minimum height
+<Button
+  variant="default"
+  size="default" // h-11 = 44px
+  className="w-full bg-blue-600 hover:bg-blue-700"
+  onClick={handleAction}
+>
+  Start Packing
+</Button>
+
+// Features:
+// - Full-width on tablet for easy tapping
+// - 500ms debounce prevents double-tap
+// - Blue color signals primary action
+```
+
+**Secondary Actions:**
+```typescript
+// ✅ CORRECT - Outline secondary button, same 44px height
+<Button
+  variant="outline"
+  size="default" // h-11 = 44px
+  onClick={handleCancel}
+>
+  Cancel
+</Button>
+
+// Features:
+// - Same touch target size (44px)
+// - Less visual weight than primary
+// - Clear hierarchy
+```
+
+**❌ WRONG:**
+```typescript
+// Too small (old 24px standard)
+<Button size="sm" onClick={handleAction}>Start</Button>
+
+// Conflicting hierarchy (two primary buttons)
+<Button variant="default">Start</Button>
+<Button variant="default">Cancel</Button>
+```
+
+---
+
+#### Feedback Pattern
+
+**Success Feedback (Multi-Level Confirmation):**
+```typescript
+// ✅ CORRECT - Multiple feedback levels for critical actions
+async function updateOrderStatus(orderId, newStatus) {
+  // 1. Optimistic UI update (instant local feedback)
+  setOrderStatus(orderId, newStatus)
+
+  try {
+    // 2. Server mutation
+    await mutateOrderStatus(orderId, newStatus)
+
+    // 3. Success toast notification
+    toast.success(`Order #${orderId} marked as ${newStatus}`)
+
+    // 4. Shimmer indicator during sync
+    setIsSyncing(true)
+    await waitForRealtimeUpdate()
+    setIsSyncing(false)
+
+    // 5. TV update visual confirmation (customer sees change)
+    // Handled automatically by Supabase Realtime
+
+  } catch (error) {
+    // Rollback optimistic update on failure
+    revertOrderStatus(orderId)
+    toast.error("Failed to update order. Please try again.")
+  }
+}
+```
+
+**Error Feedback:**
+```typescript
+// ✅ CORRECT - Clear, actionable error messages in Hebrew
+toast.error("שגיאה בעדכון ההזמנה. נסה שוב.", {
+  action: {
+    label: "נסה שוב",
+    onClick: () => retryMutation()
+  }
+})
+```
+
+**Warning Feedback:**
+```typescript
+// ✅ CORRECT - Amber warning, auto-dismiss after 5 seconds
+toast.warning("מלאי נמוך - נותרו 2 מנות בלבד", {
+  duration: 5000
+})
+```
+
+**❌ WRONG:**
+```typescript
+// Too technical, no retry option
+toast.error("ERR_MUTATION_FAILED: Status update rejected by server")
+
+// Red panic color (anxiety-inducing)
+<div className="bg-red-600">Order taking too long!</div>
+```
+
+---
+
+#### Status Indication Pattern
+
+**Redundant Encoding (Color + Text + Icon):**
+```typescript
+// ✅ CORRECT - Never rely on color alone
+<OrderCard status="ready">
+  <div className={cn(
+    "border-2 p-4",
+    "border-orange-300 bg-orange-50", // Color
+    "animate-pulse" // Animation
+  )}>
+    <Badge variant="warning">
+      ⏱️ Ready {/* Icon */}
+    </Badge>
+    <span className="text-lg font-semibold">
+      מוכן לאיסוף {/* Hebrew text */}
+    </span>
+  </div>
+</OrderCard>
+```
+
+**Status Color Consistency:**
+```typescript
+// ✅ CORRECT - Consistent status colors across all components
+const statusColors = {
+  new: {
+    border: "hsl(0 0% 85%)",
+    bg: "hsl(0 0% 99%)",
+    text: "אחסון חדש", // Gray
+    icon: "📦"
+  },
+  started: {
+    border: "hsl(217 91% 85%)",
+    bg: "hsl(217 91% 98%)",
+    text: "בתהליך", // Blue
+    icon: "⏳"
+  },
+  ready: {
+    border: "hsl(25 95% 85%)",
+    bg: "hsl(25 95% 98%)",
+    text: "מוכן", // Orange
+    icon: "⏱️",
+    animation: "pulse"
+  },
+  complete: {
+    border: "hsl(142 76% 85%)",
+    bg: "hsl(142 76% 98%)",
+    text: "הושלם", // Green
+    icon: "✓"
+  }
+}
+```
+
+**❌ WRONG:**
+```typescript
+// Relying on color only (inaccessible)
+<div className="bg-green-500" /> // No text, no icon
+
+// Inconsistent colors across components
+<Badge className="bg-lime-400">Ready</Badge> // Different green
+<Card className="bg-emerald-500">Ready</Card> // Another green
+```
+
+---
+
+#### Touch Interaction Pattern
+
+**Entire Card Tappable:**
+```typescript
+// ✅ CORRECT - Entire card is tappable, not just button
+<div
+  onClick={handleStatusChange}
+  onKeyPress={(e) => e.key === 'Enter' && handleStatusChange()}
+  role="button"
+  tabIndex={0}
+  aria-label={`Mark order ${orderId} as ${nextStatus}`}
+  className={cn(
+    "cursor-pointer transition-transform",
+    "active:scale-98", // Tactile feedback
+    "min-h-[44px] min-w-[44px]", // Touch target minimum
+    "p-4" // Generous padding for forgiving hit zones
+  )}
+>
+  <OrderContent order={order} />
+  {/* No separate button needed - entire card taps */}
+</div>
+```
+
+**Debouncing:**
+```typescript
+// ✅ CORRECT - 500ms debounce prevents double-tap
+import { useDebouncedCallback } from 'use-debounce'
+
+const handleStatusChange = useDebouncedCallback(
+  async (orderId, newStatus) => {
+    await updateOrderStatus(orderId, newStatus)
+  },
+  500, // 500ms debounce
+  { leading: true, trailing: false } // First tap wins
+)
+```
+
+**❌ WRONG:**
+```typescript
+// Tiny button, easy to miss
+<Button size="sm" className="h-6 w-6">
+  Update
+</Button>
+
+// No debounce - double-tap risk
+<Button onClick={handleStatusChange}>Update</Button>
+```
+
+---
+
+#### Empty & Loading States Pattern
+
+**Loading States (Skeleton Placeholders):**
+```typescript
+// ✅ CORRECT - Positive framing, skeleton matches final layout
+{isLoading ? (
+  <div className="space-y-4">
+    <Skeleton className="h-[88px] w-full" /> {/* Matches OrderCard height */}
+    <Skeleton className="h-[88px] w-full" />
+    <Skeleton className="h-[88px] w-full" />
+  </div>
+) : (
+  <OrderList orders={orders} />
+)}
+```
+
+**Empty States (Positive Messaging):**
+```typescript
+// ✅ CORRECT - Positive, encouraging message
+{orders.length === 0 ? (
+  <div className="text-center py-12">
+    <p className="text-lg text-gray-600">
+      אין הזמנות כרגע - זמן מצוין להכנה! 🎉
+    </p>
+  </div>
+) : (
+  <OrderList orders={orders} />
+)}
+```
+
+**❌ WRONG:**
+```typescript
+// Generic spinner (doesn't match layout)
+{isLoading && <Spinner />}
+
+// Negative empty state messaging
+<p>No orders found. Something went wrong.</p>
+```
+
+---
+
+#### Offline & Sync Pattern
+
+**Optimistic UI with Graceful Degradation:**
+```typescript
+// ✅ CORRECT - Optimistic update with rollback on failure
+async function updateOrderStatus(orderId, newStatus) {
+  // 1. Immediate local update (optimistic)
+  const previousStatus = getOrderStatus(orderId)
+  setOrderStatus(orderId, newStatus)
+
+  try {
+    // 2. Server mutation with timeout
+    const response = await fetch(`/api/orders/${orderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: newStatus }),
+      signal: AbortSignal.timeout(5000) // 5s timeout
+    })
+
+    if (!response.ok) throw new Error('Mutation failed')
+
+    // 3. Wait for Supabase Realtime confirmation
+    await waitForRealtimeUpdate(orderId, { timeout: 500 })
+
+  } catch (error) {
+    // 4. Rollback on failure
+    setOrderStatus(orderId, previousStatus)
+
+    // 5. Queue for retry if offline
+    if (!navigator.onLine) {
+      queueOfflineMutation({ orderId, newStatus })
+      toast.info("שינוי נשמר - יסונכרן כשהחיבור יחזור")
+    } else {
+      toast.error("שגיאה בעדכון. נסה שוב.")
+    }
+  }
+}
+```
+
+**Offline Queue Indicator:**
+```typescript
+// ✅ CORRECT - Clear offline state with queue count
+{offlineQueue.length > 0 && (
+  <div className="bg-yellow-50 border border-yellow-300 p-2">
+    <span className="text-sm">
+      📴 {offlineQueue.length} עדכונים ממתינים לסינכרון
+    </span>
+  </div>
+)}
+```
+
+**Shimmer Timeout Strategy:**
+```typescript
+// ✅ CORRECT - Progressive shimmer based on latency
+const [shimmerState, setShimmerState] = useState<'none' | 'subtle' | 'clear'>('none')
+
+useEffect(() => {
+  const timer150 = setTimeout(() => setShimmerState('subtle'), 150)
+  const timer500 = setTimeout(() => setShimmerState('clear'), 500)
+
+  return () => {
+    clearTimeout(timer150)
+    clearTimeout(timer500)
+  }
+}, [isSyncing])
+
+// CSS animations
+<div className={cn(
+  shimmerState === 'subtle' && "animate-shimmer-subtle", // 0.7-1.0 opacity
+  shimmerState === 'clear' && "animate-shimmer-clear" // Full shimmer effect
+)}>
+```
+
+**❌ WRONG:**
+```typescript
+// No optimistic update (feels slow)
+await updateOrderStatus(orderId, newStatus)
+setOrderStatus(orderId, newStatus) // Only updates after server response
+
+// No offline handling
+if (!navigator.onLine) {
+  alert("No internet connection") // Blocks UI, no queue
+}
+
+// Always showing shimmer (distracting)
+{isSyncing && <Spinner />} // No timeout strategy
+```
+
+---
+
+**Reference:**
+For complete UX pattern specifications including interaction flows, animation details, and accessibility considerations, see:
+- `/docs/ux-design-specification.md` - Section: "UX Consistency Patterns"
 
 ---
 
@@ -3469,11 +4254,25 @@ Based on validation results:
 ```markdown
 ## Architecture Change Log
 
-### v1.1.0 - 2025-12-15
-- **Added**: Redis caching layer for inventory queries
-- **Reason**: Inventory queries exceeded 500ms threshold
-- **Impact**: New service `lib/services/cache.ts`, updated API routes
-- **Validation**: Re-validated performance NFRs ✅
+### v1.1.0 - 2025-12-14
+- **Updated**: Integrated UX Design Specification completed 2025-12-14
+- **Changes**:
+  - Touch targets: 48px → 44px minimum (WCAG Level AAA for elderly users)
+  - Tablet orientation: Landscape → Portrait primary (768px × 1024px)
+  - Real-time sync targets: Added <100ms ideal, 500ms acceptable, shimmer timeout strategy
+  - Added 4 new sections: Visual Design Standards, Component Architecture Details, Accessibility Standards, Responsive Breakpoint Strategy
+  - Added UX Pattern Implementation Rules (6 critical patterns: button hierarchy, feedback, status indication, touch interaction, empty/loading states, offline/sync)
+  - Updated Component Architecture with 8 custom components (KanbanBoard, OrderCard, KanbanColumn, TVOrderDisplay, SyncIndicator, StatusButton, TimeElapsed, OfflineQueueIndicator)
+- **Reason**: UX Design workflow completed after initial architecture, integration required for implementation consistency
+- **Impact**:
+  - Updated button variants (h-11 = 44px minimum)
+  - New color palette (Classic Kanban Theater: gray/blue/orange/green status semantics)
+  - New typography scale (Inter font, 16px minimum body text)
+  - New spacing system (8px base grid)
+  - Hebrew RTL support patterns
+  - WCAG AA compliance requirements
+- **Input Documents**: Added `/docs/ux-design-specification.md` to frontmatter
+- **Validation**: All UX requirements integrated, architecture version bumped to 1.1.0 ✅
 
 ### v1.0.0 - 2025-12-13
 - **Initial**: Complete architecture for KitchenOS MVP

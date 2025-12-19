@@ -1,0 +1,238 @@
+# generated: 2025-12-19
+# project: kitchenos
+# project_key: kitchenos
+# tracking_system: file-system
+# story_location: docs/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2025-12-19
+project: kitchenos
+project_key: kitchenos
+tracking_system: file-system
+story_location: docs/sprint-artifacts
+
+development_status:
+  # Epic 1: WhatsApp Order Capture & Display
+  epic-1: in-progress
+
+  1-1-initialize-nextjs-project-with-supabase-and-shadcn-ui:
+    status: done
+    git:
+      branch: null  # Merged to main
+      commits: 1
+      pr_url: null
+      last_commit_sha: "2cd477d"
+      created_at: null
+      merged_at: "2025-12-19T10:00:00Z"
+
+  1-2-create-menu-management-database-schema-and-api:
+    status: ready-for-dev
+    git:
+      branch: null  # Not started yet
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  1-3-build-desktop-menu-management-ui:
+    status: backlog
+    git:
+      branch: null
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  1-4-create-orders-database-schema-and-manual-order-entry-api:
+    status: backlog
+    git:
+      branch: null
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  1-5a-build-desktop-order-creation-form:
+    status: backlog
+    git:
+      branch: null
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  1-5b-add-menu-item-selector-and-order-submission:
+    status: backlog
+    git:
+      branch: null
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  1-6-build-tablet-kanban-order-display:
+    status: backlog
+    git:
+      branch: null
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  1-7a-implement-whatsapp-webhook-and-message-parser:
+    status: backlog
+    git:
+      branch: null
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  1-7b-add-whatsapp-order-confirmation-with-retry:
+    status: backlog
+    git:
+      branch: null
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  1-8-add-order-search-and-filtering-on-desktop:
+    status: backlog
+    git:
+      branch: null
+      commits: 0
+      pr_url: null
+      last_commit_sha: null
+      created_at: null
+      merged_at: null
+
+  epic-1-retrospective: optional
+
+  # Epic 2: Order Status Management & Customer Updates
+  epic-2: backlog
+
+  2-1-implement-order-status-transition-logic-and-api: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  2-2-add-tablet-order-card-tap-to-update-status: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  2-3-build-whatsapp-notification-service-for-status-updates: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  2-4-implement-5-second-undo-for-mark-as-collected: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  2-5-add-order-detail-modal-on-desktop: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  2-6-implement-real-time-supabase-subscription-for-order-updates: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  2-7-add-status-change-history-log: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  2-8-implement-order-cancellation-workflow: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  epic-2-retrospective: optional
+
+  # Epic 3: Packing Workflow & Quality Assurance
+  epic-3: backlog
+
+  3-1-create-packing-detail-view-with-item-checklist: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  3-2-add-weight-entry-for-packed-items: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  3-3-add-special-notes-during-packing: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  3-4-implement-packing-time-tracking: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  3-5-add-payment-link-generation-on-mark-as-ready: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  3-6-build-quality-check-validation-before-ready: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  3-7-add-desktop-override-for-packing-workflow: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  3-8-implement-pickup-time-warning-system: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  epic-3-retrospective: optional
+
+  # Epic 4: Multi-Station Operations & Real-Time Sync
+  epic-4: backlog
+
+  4-1-implement-optimistic-ui-with-conflict-resolution: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  4-2-add-offline-mutation-queue-with-indexeddb: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  4-3-build-multi-tablet-station-mode-switcher: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  4-4-implement-connection-quality-indicator: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  4-5-add-desktop-real-time-order-monitor: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  4-6-implement-automatic-no-show-detection: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  4-7-add-concurrent-edit-prevention-with-locking: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  4-8-build-system-health-dashboard-on-desktop: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  epic-4-retrospective: optional
+
+  # Epic 5: Production Analytics & Business Intelligence
+  epic-5: backlog
+
+  5-1-implement-order-time-tracking-and-metrics: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  5-2-build-analytics-dashboard-for-order-flow: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  5-3-add-tv-dashboard-for-customer-facing-order-display: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  5-4-implement-weekly-kpi-report-generation: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  5-5-add-popular-items-analysis: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  5-6-implement-real-time-order-count-badges: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  5-7-add-event-log-viewer-on-desktop: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  5-8-build-customer-pickup-compliance-report: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  epic-5-retrospective: optional
+
+  # Epic 6: Advanced Customer Features
+  epic-6: backlog
+
+  6-1-create-inventory-management-schema-and-api: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  6-2-build-desktop-inventory-management-ui: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  6-3-implement-low-stock-warnings: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  6-4-add-browser-notifications-for-order-events-desktop: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  6-5-implement-order-backup-and-export: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  6-6-add-customer-order-history-lookup: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  6-7-implement-order-editing-on-desktop: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  6-8-add-failed-whatsapp-order-queue: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  epic-6-retrospective: optional
+
+  # Epic 7: Administrative & Configuration Management
+  epic-7: backlog
+
+  7-1-build-settings-management-ui: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  7-2-implement-user-management-future-multi-user: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  7-3-add-menu-item-synchronization-with-external-system: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  7-4-implement-audit-log-with-admin-actions: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  7-5-add-business-hours-configuration: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  7-6-implement-system-health-monitoring: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  7-7-add-configuration-export-import: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  7-8-implement-deployment-history-and-rollback: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  epic-7-retrospective: optional
+
+  # Epic 8: System Resilience & Edge Cases
+  epic-8: backlog
+
+  8-1-implement-comprehensive-error-boundary: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  8-2-add-graceful-degradation-for-failed-external-apis: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  8-3-implement-indexeddb-quota-management: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  8-4-add-network-retry-logic-with-exponential-backoff: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  8-5-implement-tablet-wake-up-recovery: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  8-6-add-validation-for-edge-cases: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  8-7-implement-system-diagnostics-tool: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  8-8-add-automatic-recovery-from-common-failures: {status: backlog, git: {branch: null, commits: 0, pr_url: null, last_commit_sha: null, created_at: null, merged_at: null}}
+  epic-8-retrospective: optional

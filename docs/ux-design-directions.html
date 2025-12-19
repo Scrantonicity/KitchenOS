@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KitchenOS Design Directions - Interactive Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Status Colors */
+            --color-new: hsl(0 0% 60%);
+            --color-started: hsl(217 91% 60%);
+            --color-ready: hsl(25 95% 53%);
+            --color-complete: hsl(142 71% 45%);
+
+            /* Sync Colors */
+            --color-synced: hsl(142 71% 45%);
+            --color-syncing: hsl(45 93% 47%);
+            --color-offline: hsl(0 84% 60%);
+
+            /* Neutrals */
+            --color-bg: hsl(0 0% 96%);
+            --color-card: hsl(0 0% 100%);
+            --color-border: hsl(0 0% 88%);
+            --color-text: hsl(0 0% 20%);
+            --color-text-muted: hsl(0 0% 50%);
+
+            /* Spacing */
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-12: 48px;
+
+            /* Typography */
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: "SF Mono", "Roboto Mono", "Courier New", monospace;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--color-card);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--space-6) var(--space-6);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-6);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-top: var(--space-1);
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: var(--space-2);
+            background: hsl(0 0% 98%);
+            padding: var(--space-1);
+            border-radius: 10px;
+        }
+
+        .tab-button {
+            padding: var(--space-2) var(--space-4);
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            background: hsl(0 0% 94%);
+            color: var(--color-text);
+        }
+
+        .tab-button.active {
+            background: var(--color-card);
+            color: var(--color-text);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: var(--space-8);
+        }
+
+        .direction-view {
+            display: none;
+        }
+
+        .direction-view.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Direction Header */
+        .direction-header {
+            background: var(--color-card);
+            border-radius: 16px;
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            border: 1px solid var(--color-border);
+        }
+
+        .direction-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: var(--space-3);
+            color: var(--color-text);
+        }
+
+        .direction-description {
+            font-size: 1rem;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+            margin-bottom: var(--space-5);
+        }
+
+        .feature-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+        }
+
+        .feature-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: var(--space-1) var(--space-3);
+            background: hsl(142 71% 95%);
+            color: hsl(142 71% 30%);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: var(--space-4);
+            margin-bottom: var(--space-6);
+            border: 1px solid var(--color-border);
+            display: flex;
+            gap: var(--space-6);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .control-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-muted);
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .control-btn {
+            padding: var(--space-2) var(--space-3);
+            background: hsl(0 0% 98%);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-size: 0.813rem;
+            font-weight: 500;
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .control-btn:hover {
+            background: hsl(0 0% 94%);
+            border-color: hsl(0 0% 80%);
+        }
+
+        .control-btn.active {
+            background: var(--color-started);
+            color: white;
+            border-color: var(--color-started);
+        }
+
+        /* Preview Area */
+        .preview-area {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-6);
+        }
+
+        .preview-area.with-tv {
+            grid-template-columns: 500px 1fr;
+        }
+
+        @media (max-width: 1200px) {
+            .preview-area.with-tv {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tablet Preview */
+        .tablet-preview {
+            background: var(--color-card);
+            border-radius: 16px;
+            padding: var(--space-6);
+            border: 1px solid var(--color-border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .tablet-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .device-frame {
+            max-width: 440px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: var(--space-4);
+            border: 2px solid hsl(0 0% 92%);
+            min-height: 600px;
+        }
+
+        /* Kanban Layout */
+        .kanban-container {
+            display: flex;
+            gap: var(--space-3);
+            overflow-x: auto;
+            padding-bottom: var(--space-2);
+            scroll-snap-type: x mandatory;
+        }
+
+        .kanban-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .kanban-container::-webkit-scrollbar-track {
+            background: hsl(0 0% 96%);
+            border-radius: 3px;
+        }
+
+        .kanban-container::-webkit-scrollbar-thumb {
+            background: hsl(0 0% 80%);
+            border-radius: 3px;
+        }
+
+        .kanban-column {
+            flex: 0 0 280px;
+            scroll-snap-align: start;
+        }
+
+        .kanban-column.compact {
+            flex: 0 0 240px;
+        }
+
+        .kanban-column.spacious {
+            flex: 0 0 320px;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-2) var(--space-3);
+            margin-bottom: var(--space-3);
+            background: hsl(0 0% 97%);
+            border-radius: 8px;
+        }
+
+        .column-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-muted);
+        }
+
+        .column-count {
+            font-size: 0.875rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        .column-count.new { color: var(--color-new); }
+        .column-count.started { color: var(--color-started); }
+        .column-count.ready { color: var(--color-ready); }
+        .column-count.complete { color: var(--color-complete); }
+
+        /* Order Cards */
+        .order-cards {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 8px;
+            padding: var(--space-3);
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: currentColor;
+            transform: scaleX(0);
+            transition: transform 0.2s ease;
+        }
+
+        .order-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .order-card:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .order-card.new {
+            border-color: hsl(0 0% 85%);
+            background: hsl(0 0% 99%);
+            color: var(--color-new);
+        }
+
+        .order-card.started {
+            border-color: hsl(217 91% 85%);
+            background: hsl(217 91% 98%);
+            color: var(--color-started);
+        }
+
+        .order-card.ready {
+            border-color: hsl(25 95% 85%);
+            background: hsl(25 95% 97%);
+            color: var(--color-ready);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(253, 186, 116, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(253, 186, 116, 0); }
+        }
+
+        .order-card.complete {
+            border-color: hsl(142 71% 85%);
+            background: hsl(142 71% 97%);
+            color: var(--color-complete);
+            opacity: 0.8;
+        }
+
+        .order-card.syncing {
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-2);
+        }
+
+        .customer-name {
+            font-size: 0.938rem;
+            font-weight: 600;
+            color: hsl(0 0% 10%);
+        }
+
+        .sync-indicator {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+
+        .sync-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .sync-dot.synced {
+            background: var(--color-synced);
+        }
+
+        .sync-dot.syncing {
+            background: var(--color-syncing);
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .order-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.813rem;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-3);
+        }
+
+        .time-elapsed {
+            font-family: var(--font-mono);
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .order-action {
+            width: 100%;
+            padding: var(--space-2) var(--space-3);
+            background: var(--color-started);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-size: 0.813rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-height: 44px;
+        }
+
+        .order-action:hover {
+            background: hsl(217 91% 55%);
+            transform: scale(1.02);
+        }
+
+        .order-action:active {
+            transform: scale(0.98);
+        }
+
+        .order-action.ready-action {
+            background: var(--color-ready);
+        }
+
+        .order-action.ready-action:hover {
+            background: hsl(25 95% 48%);
+        }
+
+        .order-action.complete-action {
+            background: var(--color-complete);
+        }
+
+        .order-action.complete-action:hover {
+            background: hsl(142 71% 40%);
+        }
+
+        /* TV Display */
+        .tv-preview {
+            background: hsl(0 0% 8%);
+            border-radius: 16px;
+            padding: var(--space-8);
+            border: 1px solid hsl(0 0% 12%);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            min-height: 600px;
+        }
+
+        .tv-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: hsl(0 0% 50%);
+            margin-bottom: var(--space-6);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .tv-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-8);
+        }
+
+        .tv-section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: hsl(0 0% 60%);
+            margin-bottom: var(--space-5);
+        }
+
+        .tv-order-card {
+            background: hsl(0 0% 12%);
+            border-radius: 12px;
+            padding: var(--space-6);
+            border: 3px solid;
+            margin-bottom: var(--space-4);
+            transition: all 0.3s ease;
+        }
+
+        .tv-order-card.started {
+            border-color: var(--color-started);
+        }
+
+        .tv-order-card.ready {
+            border-color: var(--color-ready);
+        }
+
+        .tv-customer {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: var(--space-3);
+        }
+
+        .tv-time {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            color: hsl(0 0% 60%);
+        }
+
+        /* Adaptive Hybrid Layout */
+        .hybrid-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .status-section {
+            background: hsl(0 0% 98%);
+            border-radius: 12px;
+            padding: var(--space-4);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-3);
+            padding: 0 var(--space-2);
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-muted);
+        }
+
+        .section-count {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .horizontal-scroll {
+            display: flex;
+            gap: var(--space-2);
+            overflow-x: auto;
+            padding-bottom: var(--space-2);
+        }
+
+        .horizontal-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar-track {
+            background: hsl(0 0% 94%);
+            border-radius: 2px;
+        }
+
+        .horizontal-scroll::-webkit-scrollbar-thumb {
+            background: hsl(0 0% 75%);
+            border-radius: 2px;
+        }
+
+        .compact-card {
+            flex: 0 0 160px;
+            background: white;
+            border-radius: 8px;
+            padding: var(--space-3);
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .compact-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .compact-card.new { border-color: hsl(0 0% 85%); }
+        .compact-card.started { border-color: hsl(217 91% 85%); background: hsl(217 91% 98%); }
+        .compact-card.ready { border-color: hsl(25 95% 85%); background: hsl(25 95% 97%); }
+
+        .compact-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: hsl(0 0% 10%);
+            margin-bottom: var(--space-1);
+        }
+
+        .compact-meta {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            margin-bottom: var(--space-1);
+        }
+
+        .compact-time {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .expanded-card {
+            background: white;
+            border-radius: 8px;
+            padding: var(--space-4);
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: var(--space-2);
+        }
+
+        .expanded-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .expanded-card.started { border-color: hsl(217 91% 85%); background: hsl(217 91% 98%); }
+        .expanded-card.ready { border-color: hsl(25 95% 85%); background: hsl(25 95% 97%); }
+
+        /* Info Panel */
+        .info-panel {
+            background: hsl(217 91% 98%);
+            border-left: 4px solid var(--color-started);
+            border-radius: 8px;
+            padding: var(--space-4);
+            margin-top: var(--space-6);
+        }
+
+        .info-panel h3 {
+            font-size: 0.938rem;
+            font-weight: 600;
+            color: hsl(217 91% 35%);
+            margin-bottom: var(--space-2);
+        }
+
+        .info-panel p {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--color-text);
+        }
+
+        /* Sync Animation */
+        @keyframes syncPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(74, 144, 226, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(74, 144, 226, 0);
+            }
+        }
+
+        .syncing-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--color-syncing);
+            border-radius: 50%;
+            animation: syncPulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>KitchenOS Design Directions</h1>
+                <div class="header-subtitle">Interactive Prototype - Click cards to advance status</div>
+            </div>
+            <div class="tab-nav">
+                <button class="tab-button active" data-tab="kanban">Direction 1: Classic Kanban</button>
+                <button class="tab-button" data-tab="hybrid">Direction 5: Adaptive Hybrid</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Direction 1: Classic Kanban Theater -->
+        <div id="kanban" class="direction-view active">
+            <div class="direction-header">
+                <h2 class="direction-title">Direction 1: Classic Kanban Theater</h2>
+                <p class="direction-description">
+                    Notion-inspired spatial columns with immersive color-coding. Each status is a <strong>PLACE</strong> on screen,
+                    building powerful muscle memory. Orders flow left-to-right in a choreographed dance that syncs instantly to the TV display.
+                </p>
+                <div class="feature-tags">
+                    <span class="feature-tag">✓ Spatial Memory Excellence</span>
+                    <span class="feature-tag">✓ Full Color Immersion</span>
+                    <span class="feature-tag">✓ Horizontal Flow</span>
+                    <span class="feature-tag">✓ Zero Training Required</span>
+                    <span class="feature-tag">✓ Instant TV Sync</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <div class="control-label">Density</div>
+                    <div class="control-buttons">
+                        <button class="control-btn" data-density="compact">Compact</button>
+                        <button class="control-btn active" data-density="normal">Normal</button>
+                        <button class="control-btn" data-density="spacious">Spacious</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">View</div>
+                    <div class="control-buttons">
+                        <button class="control-btn active" data-view="tablet">Tablet Only</button>
+                        <button class="control-btn" data-view="split">Tablet + TV</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Actions</div>
+                    <div class="control-buttons">
+                        <button class="control-btn" id="add-order">+ Add Order</button>
+                        <button class="control-btn" id="reset-kanban">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-area" id="kanban-preview">
+                <div class="tablet-preview">
+                    <div class="tablet-label">
+                        📱 Tablet View (Portrait)
+                        <span class="syncing-indicator"></span>
+                    </div>
+                    <div class="device-frame">
+                        <div class="kanban-container" id="kanban-board">
+                            <!-- Kanban columns will be rendered by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tv-preview" id="tv-display" style="display: none;">
+                    <div class="tv-label">
+                        📺 40" TV Display (Customer-Facing)
+                        <span class="syncing-indicator"></span>
+                    </div>
+                    <div class="tv-grid" id="tv-content">
+                        <!-- TV content will be rendered by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>💡 Why Classic Kanban Works for KitchenOS</h3>
+                <p>
+                    <strong>Spatial memory is instant learning.</strong> After 2-3 orders, staff know exactly where to look and tap without thinking.
+                    The horizontal flow matches the mental model of "progress" (left = waiting, right = done). Color-coded cards make status
+                    visible from across the kitchen. When you tap "Mark Ready," the card animates to the Ready column AND appears on the TV
+                    in <100ms - creating the "choreographed competence" theater that makes staff feel like pros.
+                </p>
+            </div>
+        </div>
+
+        <!-- Direction 5: Adaptive Hybrid Layout -->
+        <div id="hybrid" class="direction-view">
+            <div class="direction-header">
+                <h2 class="direction-title">Direction 5: Adaptive Hybrid Layout</h2>
+                <p class="direction-description">
+                    Combines kanban spatial memory with list efficiency. Layout <strong>adapts intelligently</strong> based on order volume -
+                    compact horizontal scrolling for New orders (high volume), expanded vertical cards for Started/Ready (needs attention).
+                </p>
+                <div class="feature-tags">
+                    <span class="feature-tag">✓ Volume-Aware Adaptation</span>
+                    <span class="feature-tag">✓ Best of Both Worlds</span>
+                    <span class="feature-tag">✓ Efficient Use of Space</span>
+                    <span class="feature-tag">✓ Context-Sensitive Design</span>
+                    <span class="feature-tag">✓ Scales with Rush Hours</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <div class="control-label">Volume</div>
+                    <div class="control-buttons">
+                        <button class="control-btn" data-volume="low">Low (2-3 orders)</button>
+                        <button class="control-btn active" data-volume="medium">Medium (5-7 orders)</button>
+                        <button class="control-btn" data-volume="high">High (10+ orders)</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">View</div>
+                    <div class="control-buttons">
+                        <button class="control-btn active" data-view-hybrid="tablet">Tablet Only</button>
+                        <button class="control-btn" data-view-hybrid="split">Tablet + TV</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Actions</div>
+                    <div class="control-buttons">
+                        <button class="control-btn" id="add-order-hybrid">+ Add Order</button>
+                        <button class="control-btn" id="reset-hybrid">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-area" id="hybrid-preview">
+                <div class="tablet-preview">
+                    <div class="tablet-label">
+                        📱 Tablet View (Portrait)
+                        <span class="syncing-indicator"></span>
+                    </div>
+                    <div class="device-frame">
+                        <div class="hybrid-container" id="hybrid-board">
+                            <!-- Hybrid layout will be rendered by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tv-preview" id="tv-display-hybrid" style="display: none;">
+                    <div class="tv-label">
+                        📺 40" TV Display (Customer-Facing)
+                        <span class="syncing-indicator"></span>
+                    </div>
+                    <div class="tv-grid" id="tv-content-hybrid">
+                        <!-- TV content will be rendered by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3>💡 Why Adaptive Hybrid Works for KitchenOS</h3>
+                <p>
+                    <strong>Context-aware design reduces cognitive load.</strong> During rush hours with 10+ new orders, the compact horizontal
+                    scroll lets you see all of them at once. But for Started/Ready orders that need attention, expanded cards provide breathing
+                    room and bigger tap targets. The layout automatically adapts - you don't have to think about it. This gives you kanban's
+                    spatial memory benefits while maximizing screen real estate efficiency on portrait tablets.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample Data
+        const sampleOrders = [
+            { id: 1, customer: 'Sarah', items: 3, status: 'new', time: 2 },
+            { id: 2, customer: 'David', items: 5, status: 'new', time: 1 },
+            { id: 3, customer: 'Michael', items: 2, status: 'started', time: 7 },
+            { id: 4, customer: 'Rachel', items: 4, status: 'ready', time: 12 },
+            { id: 5, customer: 'Emma', items: 1, status: 'new', time: 3 },
+        ];
+
+        let kanbanOrders = [...sampleOrders];
+        let hybridOrders = [...sampleOrders];
+        let nextOrderId = 6;
+        let kanbanDensity = 'normal';
+        let hybridVolume = 'medium';
+
+        // Tab Navigation
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+
+                document.querySelectorAll('.direction-view').forEach(v => v.classList.remove('active'));
+                document.getElementById(tab).classList.add('active');
+            });
+        });
+
+        // Kanban Controls
+        document.querySelectorAll('[data-density]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-density]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                kanbanDensity = btn.dataset.density;
+                renderKanban();
+            });
+        });
+
+        document.querySelectorAll('[data-view]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const view = btn.dataset.view;
+
+                const preview = document.getElementById('kanban-preview');
+                const tvDisplay = document.getElementById('tv-display');
+
+                if (view === 'split') {
+                    preview.classList.add('with-tv');
+                    tvDisplay.style.display = 'block';
+                } else {
+                    preview.classList.remove('with-tv');
+                    tvDisplay.style.display = 'none';
+                }
+
+                renderTV();
+            });
+        });
+
+        document.getElementById('add-order').addEventListener('click', () => {
+            const names = ['Alex', 'Jordan', 'Taylor', 'Casey', 'Morgan', 'Riley', 'Jamie', 'Quinn'];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const randomItems = Math.floor(Math.random() * 5) + 1;
+
+            kanbanOrders.push({
+                id: nextOrderId++,
+                customer: randomName,
+                items: randomItems,
+                status: 'new',
+                time: 0
+            });
+
+            renderKanban();
+            renderTV();
+        });
+
+        document.getElementById('reset-kanban').addEventListener('click', () => {
+            kanbanOrders = [...sampleOrders];
+            nextOrderId = 6;
+            renderKanban();
+            renderTV();
+        });
+
+        // Hybrid Controls
+        document.querySelectorAll('[data-volume]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-volume]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                hybridVolume = btn.dataset.volume;
+                renderHybrid();
+            });
+        });
+
+        document.querySelectorAll('[data-view-hybrid]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-view-hybrid]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const view = btn.dataset.viewHybrid;
+
+                const preview = document.getElementById('hybrid-preview');
+                const tvDisplay = document.getElementById('tv-display-hybrid');
+
+                if (view === 'split') {
+                    preview.classList.add('with-tv');
+                    tvDisplay.style.display = 'block';
+                } else {
+                    preview.classList.remove('with-tv');
+                    tvDisplay.style.display = 'none';
+                }
+
+                renderTVHybrid();
+            });
+        });
+
+        document.getElementById('add-order-hybrid').addEventListener('click', () => {
+            const names = ['Alex', 'Jordan', 'Taylor', 'Casey', 'Morgan', 'Riley', 'Jamie', 'Quinn'];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            const randomItems = Math.floor(Math.random() * 5) + 1;
+
+            hybridOrders.push({
+                id: nextOrderId++,
+                customer: randomName,
+                items: randomItems,
+                status: 'new',
+                time: 0
+            });
+
+            renderHybrid();
+            renderTVHybrid();
+        });
+
+        document.getElementById('reset-hybrid').addEventListener('click', () => {
+            hybridOrders = [...sampleOrders];
+            nextOrderId = 6;
+            renderHybrid();
+            renderTVHybrid();
+        });
+
+        // Render Kanban
+        function renderKanban() {
+            const board = document.getElementById('kanban-board');
+            const statuses = ['new', 'started', 'ready', 'complete'];
+            const statusLabels = { new: 'New', started: 'Started', ready: 'Ready', complete: 'Complete' };
+
+            board.innerHTML = '';
+
+            statuses.forEach(status => {
+                const orders = kanbanOrders.filter(o => o.status === status);
+                const column = document.createElement('div');
+                column.className = `kanban-column ${kanbanDensity}`;
+
+                column.innerHTML = `
+                    <div class="column-header">
+                        <span class="column-title">${statusLabels[status]}</span>
+                        <span class="column-count ${status}">${orders.length}</span>
+                    </div>
+                    <div class="order-cards">
+                        ${orders.map(order => createKanbanCard(order)).join('')}
+                    </div>
+                `;
+
+                board.appendChild(column);
+            });
+
+            // Add click handlers
+            board.querySelectorAll('.order-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const orderId = parseInt(card.dataset.orderId);
+                    advanceOrderStatus(orderId, 'kanban');
+                });
+            });
+        }
+
+        function createKanbanCard(order) {
+            const actionLabels = {
+                new: 'Start Order',
+                started: 'Mark Ready',
+                ready: 'Complete',
+                complete: 'Archive'
+            };
+
+            const actionClasses = {
+                new: '',
+                started: '',
+                ready: 'ready-action',
+                complete: 'complete-action'
+            };
+
+            return `
+                <div class="order-card ${order.status}" data-order-id="${order.id}">
+                    <div class="order-header">
+                        <span class="customer-name">${order.customer}</span>
+                        <span class="sync-indicator">
+                            <span class="sync-dot synced"></span>
+                        </span>
+                    </div>
+                    <div class="order-meta">
+                        <span>${order.items} item${order.items > 1 ? 's' : ''}</span>
+                        <span class="time-elapsed">${order.time}m</span>
+                    </div>
+                    ${order.status !== 'complete' ? `
+                        <button class="order-action ${actionClasses[order.status]}" onclick="event.stopPropagation()">
+                            ${actionLabels[order.status]}
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function advanceOrderStatus(orderId, type) {
+            const orders = type === 'kanban' ? kanbanOrders : hybridOrders;
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const statusFlow = ['new', 'started', 'ready', 'complete'];
+            const currentIndex = statusFlow.indexOf(order.status);
+
+            if (currentIndex < statusFlow.length - 1) {
+                order.status = statusFlow[currentIndex + 1];
+
+                // Animate sync
+                const cards = document.querySelectorAll(`[data-order-id="${orderId}"]`);
+                cards.forEach(card => {
+                    card.classList.add('syncing');
+                    setTimeout(() => card.classList.remove('syncing'), 500);
+                });
+
+                if (type === 'kanban') {
+                    renderKanban();
+                    renderTV();
+                } else {
+                    renderHybrid();
+                    renderTVHybrid();
+                }
+            }
+        }
+
+        function renderTV() {
+            const tvContent = document.getElementById('tv-content');
+            const startedOrders = kanbanOrders.filter(o => o.status === 'started');
+            const readyOrders = kanbanOrders.filter(o => o.status === 'ready');
+
+            tvContent.innerHTML = `
+                <div>
+                    <h3 class="tv-section-title">In Progress</h3>
+                    ${startedOrders.length > 0 ? startedOrders.map(order => `
+                        <div class="tv-order-card started">
+                            <div class="tv-customer">${order.customer}</div>
+                            <div class="tv-time">${order.time} minutes</div>
+                        </div>
+                    `).join('') : '<p style="color: hsl(0 0% 40%); font-size: 1rem;">No orders in progress</p>'}
+                </div>
+                <div>
+                    <h3 class="tv-section-title">Ready</h3>
+                    ${readyOrders.length > 0 ? readyOrders.map(order => `
+                        <div class="tv-order-card ready">
+                            <div class="tv-customer">${order.customer}</div>
+                            <div class="tv-time">${order.time} minutes</div>
+                        </div>
+                    `).join('') : '<p style="color: hsl(0 0% 40%); font-size: 1rem;">No orders ready</p>'}
+                </div>
+            `;
+        }
+
+        // Render Hybrid
+        function renderHybrid() {
+            const board = document.getElementById('hybrid-board');
+            const newOrders = hybridOrders.filter(o => o.status === 'new');
+            const startedOrders = hybridOrders.filter(o => o.status === 'started');
+            const readyOrders = hybridOrders.filter(o => o.status === 'ready');
+
+            board.innerHTML = `
+                ${newOrders.length > 0 ? `
+                    <div class="status-section">
+                        <div class="section-header">
+                            <span class="section-title">New Orders</span>
+                            <span class="section-count" style="color: var(--color-new);">${newOrders.length}</span>
+                        </div>
+                        <div class="horizontal-scroll">
+                            ${newOrders.map(order => createCompactCard(order)).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${startedOrders.length > 0 ? `
+                    <div class="status-section">
+                        <div class="section-header">
+                            <span class="section-title">In Progress</span>
+                            <span class="section-count" style="color: var(--color-started);">${startedOrders.length}</span>
+                        </div>
+                        ${startedOrders.map(order => createExpandedCard(order)).join('')}
+                    </div>
+                ` : ''}
+
+                ${readyOrders.length > 0 ? `
+                    <div class="status-section">
+                        <div class="section-header">
+                            <span class="section-title">Ready for Pickup</span>
+                            <span class="section-count" style="color: var(--color-ready);">${readyOrders.length}</span>
+                        </div>
+                        ${readyOrders.map(order => createExpandedCard(order)).join('')}
+                    </div>
+                ` : ''}
+            `;
+
+            // Add click handlers
+            board.querySelectorAll('[data-order-id]').forEach(card => {
+                card.addEventListener('click', () => {
+                    const orderId = parseInt(card.dataset.orderId);
+                    advanceOrderStatus(orderId, 'hybrid');
+                });
+            });
+        }
+
+        function createCompactCard(order) {
+            return `
+                <div class="compact-card ${order.status}" data-order-id="${order.id}">
+                    <div class="compact-name">${order.customer}</div>
+                    <div class="compact-meta">${order.items} item${order.items > 1 ? 's' : ''}</div>
+                    <div class="compact-time">${order.time}m</div>
+                </div>
+            `;
+        }
+
+        function createExpandedCard(order) {
+            const actionLabels = {
+                started: 'Mark Ready',
+                ready: 'Complete Order'
+            };
+
+            const actionClasses = {
+                started: '',
+                ready: 'ready-action'
+            };
+
+            return `
+                <div class="expanded-card ${order.status}" data-order-id="${order.id}">
+                    <div class="order-header">
+                        <div class="customer-name">${order.customer}</div>
+                        <span class="time-elapsed">${order.time}m</span>
+                    </div>
+                    <div style="font-size: 0.813rem; color: var(--color-text-muted); margin-bottom: var(--space-3);">
+                        ${order.items} item${order.items > 1 ? 's' : ''}
+                    </div>
+                    <button class="order-action ${actionClasses[order.status]}" onclick="event.stopPropagation()">
+                        ${actionLabels[order.status]}
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderTVHybrid() {
+            const tvContent = document.getElementById('tv-content-hybrid');
+            const startedOrders = hybridOrders.filter(o => o.status === 'started');
+            const readyOrders = hybridOrders.filter(o => o.status === 'ready');
+
+            tvContent.innerHTML = `
+                <div>
+                    <h3 class="tv-section-title">In Progress</h3>
+                    ${startedOrders.length > 0 ? startedOrders.map(order => `
+                        <div class="tv-order-card started">
+                            <div class="tv-customer">${order.customer}</div>
+                            <div class="tv-time">${order.time} minutes</div>
+                        </div>
+                    `).join('') : '<p style="color: hsl(0 0% 40%); font-size: 1rem;">No orders in progress</p>'}
+                </div>
+                <div>
+                    <h3 class="tv-section-title">Ready</h3>
+                    ${readyOrders.length > 0 ? readyOrders.map(order => `
+                        <div class="tv-order-card ready">
+                            <div class="tv-customer">${order.customer}</div>
+                            <div class="tv-time">${order.time} minutes</div>
+                        </div>
+                    `).join('') : '<p style="color: hsl(0 0% 40%); font-size: 1rem;">No orders ready</p>'}
+                </div>
+            `;
+        }
+
+        // Initial render
+        renderKanban();
+        renderTV();
+        renderHybrid();
+        renderTVHybrid();
+
+        // Simulate time updates every 10 seconds
+        setInterval(() => {
+            kanbanOrders.forEach(order => {
+                if (order.status !== 'complete') {
+                    order.time += 1;
+                }
+            });
+            hybridOrders.forEach(order => {
+                if (order.status !== 'complete') {
+                    order.time += 1;
+                }
+            });
+
+            // Only re-render the active tab
+            const activeTab = document.querySelector('.direction-view.active').id;
+            if (activeTab === 'kanban') {
+                renderKanban();
+                if (document.getElementById('tv-display').style.display !== 'none') {
+                    renderTV();
+                }
+            } else {
+                renderHybrid();
+                if (document.getElementById('tv-display-hybrid').style.display !== 'none') {
+                    renderTVHybrid();
+                }
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

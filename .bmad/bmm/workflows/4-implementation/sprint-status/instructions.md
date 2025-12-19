@@ -42,10 +42,24 @@ Run `/bmad:bmm:workflows:sprint-planning` to generate it, then rerun sprint-stat
   - Stories: everything else (e.g., 1-2-login-form)
   <action>Count story statuses: backlog, drafted, ready-for-dev, in-progress, review, done</action>
   <action>Count epic statuses: backlog, contexted</action>
+  <action>Parse git metadata for each story (if available):
+    - branch: Active branch name or null if merged/not started
+    - commits: Number of commits on the branch
+    - last_commit_sha: Abbreviated SHA (7 chars)
+    - created_at: Branch creation timestamp (ISO format)
+    - merged_at: Merge timestamp if merged (ISO format)
+  </action>
+  <action>Calculate git statistics for stories with active branches:
+    - Days since branch created
+    - Commit frequency
+    - Active branches count
+  </action>
   <action>Detect risks:</action>
   - Stories in review but no reviewer assigned context → suggest `/bmad:bmm:workflows:code-review`
   - Stories in in-progress with no ready-for-dev items behind them → keep focus on the active story
   - All epics backlog/contexted but no stories drafted → prompt to run `/bmad:bmm:workflows:create-story`
+  - Stories with active branches older than 7 days → suggest merging or addressing blockers
+  - Stories in-progress with 0 commits → might need attention
 </step>
 
 <step n="3" goal="Select next action recommendation">
@@ -109,12 +123,50 @@ If the command targets a story, set `story_key={{next_story_id}}` when prompted.
   <check if="choice == 2">
     <output>
 ### Stories by Status
-- In Progress: {{stories_in_progress}}
-- Review: {{stories_in_review}}
-- Ready for Dev: {{stories_ready_for_dev}}
-- Drafted: {{stories_drafted}}
-- Backlog: {{stories_backlog}}
-- Done: {{stories_done}}
+
+**In Progress:**
+{{#each stories_in_progress}}
+- {{story_id}} ({{story_status}})
+  {{#if git.branch}}
+  └─ Branch: {{git.branch}} ({{git.commits}} commits, {{last_commit_sha_short}})
+  {{#if days_since_created}}└─ Created: {{days_since_created}} days ago{{/if}}
+  {{else}}
+  └─ No git branch
+  {{/if}}
+{{/each}}
+
+**Review:**
+{{#each stories_in_review}}
+- {{story_id}} ({{story_status}})
+  {{#if git.branch}}
+  └─ Branch: {{git.branch}} ({{git.commits}} commits, {{last_commit_sha_short}})
+  {{else}}
+  └─ Merged or no branch
+  {{/if}}
+{{/each}}
+
+**Ready for Dev:**
+{{#each stories_ready_for_dev}}
+- {{story_id}}
+{{/each}}
+
+**Drafted:**
+{{#each stories_drafted}}
+- {{story_id}}
+{{/each}}
+
+**Backlog:**
+{{#each stories_backlog}}
+- {{story_id}}
+{{/each}}
+
+**Done:**
+{{#each stories_done}}
+- {{story_id}}
+  {{#if git.merged_at}}
+  └─ Merged: {{git.merged_at_formatted}}
+  {{/if}}
+{{/each}}
     </output>
   </check>
 

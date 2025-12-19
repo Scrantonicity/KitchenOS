@@ -219,6 +219,95 @@
 
       {{#if new_status == "done"}}Story is ready for next work!{{else}}Address the action items and continue development.{{/if}}
     </output>
+
+    <!-- Git Merge Instructions (when story is done) -->
+    <check if="{{new_status}} == 'done'">
+      <action>Parse {{story_key}} to extract epic and story numbers</action>
+      <action>Load {{sprint_status}} to get git metadata for story</action>
+      <action>Extract branch name from story's git metadata</action>
+
+      <check if="branch name exists">
+        <output>
+
+## 🎉 Code Review PASSED!
+
+**Story is ready to merge to main**
+
+### Option 1: Automated Merge (Recommended)
+
+Run the automated merge script:
+```bash
+node scripts/merge-story.js {epic}-{story}
+```
+
+This will:
+- Checkout main and pull latest
+- Squash merge your story branch
+- Generate standardized commit message
+- Update sprint-status.yaml with merge metadata
+- Delete the story branch
+
+### Option 2: Manual Merge
+
+If you prefer to merge manually:
+
+```bash
+# 1. Checkout main and pull latest
+git checkout main
+git pull origin main
+
+# 2. Squash merge the story branch
+git merge --squash {{branch_name}}
+
+# 3. Commit with standardized message
+git commit
+# (Use the commit message format from the story file)
+
+# 4. Push to main
+git push origin main
+
+# 5. Delete the story branch
+git branch -d {{branch_name}}
+```
+
+        </output>
+
+        <ask>Would you like me to proceed with the automated merge now? (yes/no)</ask>
+
+        <check if="user confirms">
+          <action>Execute: node scripts/merge-story.js {epic}-{story}</action>
+          <output>✅ Story successfully merged to main!</output>
+        </check>
+
+        <check if="user declines">
+          <output>ℹ️ Merge instructions provided above. You can merge whenever you're ready.</output>
+        </check>
+      </check>
+
+      <check if="branch name does NOT exist">
+        <output>ℹ️ No git branch found for this story. Manual merge not required.</output>
+      </check>
+    </check>
+
+    <!-- Git Commit Instructions (when story returns to in-progress) -->
+    <check if="{{new_status}} == 'in-progress' AND {{fixed_count}} gt 0">
+      <output>
+
+## 📝 Next Steps
+
+You've fixed {{fixed_count}} issues. To commit these fixes:
+
+```bash
+# Stage all changes
+git add .
+
+# Commit with story format
+git commit -m "{epic}-{story}: Address review feedback - fixed {{fixed_count}} issues"
+```
+
+Then continue development on your story branch.
+      </output>
+    </check>
   </step>
 
 </workflow>
