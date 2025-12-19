@@ -77,10 +77,10 @@ export default function Page() {
 ```typescript
 // src/app/api/orders/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(req: NextRequest) {
-  const supabase = createServerClient() // Use server client for API routes
+  const supabase = await createClient() // Use server client for API routes (async)
   // ... implementation
   return NextResponse.json({ data })
 }
@@ -91,7 +91,7 @@ import { createClient } from '@/lib/supabase/client' // Don't use client in API 
 
 **Supabase Client Usage (CRITICAL):**
 - **Browser/Client Components:** Use `createClient()` from `@/lib/supabase/client`
-- **Server Components/API Routes:** Use `createServerClient()` from `@/lib/supabase/server`
+- **Server Components/API Routes:** Use `createClient()` (async) from `@/lib/supabase/server`
 - **Admin Operations:** Use `createAdminClient()` from `@/lib/supabase/admin`
 - ❌ **NEVER mix client types** - wrong client = auth failures
 
@@ -306,9 +306,9 @@ export async function GET() {
 }
 
 // CORRECT
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 export async function GET() {
-  const supabase = createServerClient() // Has access to cookies
+  const supabase = await createClient() // Has access to cookies (async function)
 }
 ```
 
