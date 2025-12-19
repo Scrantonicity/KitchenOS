@@ -65,12 +65,12 @@ development_status:
       merged_at: "2025-12-19T12:30:00Z"
 
   1-3-build-desktop-menu-management-ui:
-    status: in-progress
+    status: review
     git:
       branch: "1/3-build-desktop-menu-management-ui"
-      commits: 1
+      commits: 2
       pr_url: null
-      last_commit_sha: "c1e0540"
+      last_commit_sha: "aa9ea47"
       created_at: "2025-12-19T19:22:00Z"
       merged_at: null
 
