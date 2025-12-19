@@ -65,13 +65,13 @@ development_status:
       merged_at: "2025-12-19T12:30:00Z"
 
   1-3-build-desktop-menu-management-ui:
-    status: ready-for-dev
+    status: in-progress
     git:
-      branch: null
-      commits: 0
+      branch: "1/3-build-desktop-menu-management-ui"
+      commits: 1
       pr_url: null
-      last_commit_sha: null
-      created_at: null
+      last_commit_sha: "c1e0540"
+      created_at: "2025-12-19T19:22:00Z"
       merged_at: null
 
   1-4-create-orders-database-schema-and-manual-order-entry-api:
