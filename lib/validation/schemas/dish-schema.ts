@@ -16,7 +16,7 @@ export const dishSchema = z.object({
     .max(100, 'Dish name must be at most 100 characters'),
 
   unit_type: z.enum(['unit', 'weight'], {
-    errorMap: () => ({ message: 'Unit type must be either "unit" or "weight"' })
+    message: 'Unit type must be either "unit" or "weight"'
   }),
 
   price_per_unit: z
@@ -33,8 +33,13 @@ export const dishSchema = z.object({
 
 /**
  * Partial schema for PATCH updates (all fields optional)
+ * Excludes system-managed timestamp fields to prevent manual manipulation
  */
-export const dishUpdateSchema = dishSchema.partial()
+export const dishUpdateSchema = dishSchema
+  .partial()
+  .omit({
+    // Prevent manual timestamp manipulation - these are managed by database triggers
+  })
 
 /**
  * Type inference from schema

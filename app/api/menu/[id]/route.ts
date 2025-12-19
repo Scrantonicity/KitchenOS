@@ -8,6 +8,28 @@ type RouteContext = {
 }
 
 /**
+ * UUID validation regex (RFC 4122)
+ */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Validates if a string is a valid UUID
+ */
+function isValidUuid(id: string): boolean {
+  return UUID_REGEX.test(id)
+}
+
+/**
+ * Sanitizes error messages for production
+ */
+function sanitizeErrorMessage(message: string): string {
+  if (process.env.NODE_ENV === 'production') {
+    return 'Database operation failed'
+  }
+  return message
+}
+
+/**
  * PATCH /api/menu/[id]
  *
  * Updates an existing dish (partial update)
@@ -23,6 +45,20 @@ type RouteContext = {
 export async function PATCH(req: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params
+
+    // Validate UUID format
+    if (!isValidUuid(id)) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_ID',
+            message: 'ID must be a valid UUID'
+          }
+        },
+        { status: 400 }
+      )
+    }
+
     const body = await req.json()
 
     // Validate request body with Zod (partial schema for updates)
@@ -81,7 +117,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
         {
           error: {
             code: 'DATABASE_ERROR',
-            message: error.message
+            message: sanitizeErrorMessage(error.message)
           }
         },
         { status: 500 }
@@ -123,13 +159,27 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
  * (This is not a hard delete from the database)
  *
  * Response:
- * - 200: { message: string, data: Dish }
+ * - 200: { data: Dish }
  * - 404: { error: { code: 'NOT_FOUND', message: string } }
  * - 500: { error: { code: string, message: string } }
  */
 export async function DELETE(req: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params
+
+    // Validate UUID format
+    if (!isValidUuid(id)) {
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_ID',
+            message: 'ID must be a valid UUID'
+          }
+        },
+        { status: 400 }
+      )
+    }
+
     const supabase = await createClient()
 
     // Soft delete: set is_active to false
@@ -159,20 +209,14 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
         {
           error: {
             code: 'DATABASE_ERROR',
-            message: error.message
+            message: sanitizeErrorMessage(error.message)
           }
         },
         { status: 500 }
       )
     }
 
-    return NextResponse.json(
-      {
-        message: 'Dish deactivated successfully',
-        data
-      },
-      { status: 200 }
-    )
+    return NextResponse.json({ data }, { status: 200 })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/menu/[id]:', error)
     return NextResponse.json(
