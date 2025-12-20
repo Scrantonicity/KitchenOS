@@ -85,7 +85,7 @@ development_status:
       merged_at: "2025-12-20T16:00:00Z"
 
   1-5a-build-desktop-order-creation-form:
-    status: backlog
+    status: ready-for-dev
     git:
       branch: null
       commits: 0
