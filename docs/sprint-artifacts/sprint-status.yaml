@@ -77,12 +77,12 @@ development_status:
   1-4-create-orders-database-schema-and-manual-order-entry-api:
     status: done
     git:
-      branch: "1/4-create-orders-database-schema-and-manual-order-entry-api"
-      commits: 2
+      branch: null  # Merged to main
+      commits: 3
       pr_url: null
-      last_commit_sha: "68755d4"
+      last_commit_sha: "556bf20"
       created_at: "2025-12-20T00:10:00Z"
-      merged_at: null
+      merged_at: "2025-12-20T16:00:00Z"
 
   1-5a-build-desktop-order-creation-form:
     status: backlog
