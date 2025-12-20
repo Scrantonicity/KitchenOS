@@ -131,9 +131,15 @@ export function MenuItemForm({ defaultValues, onSuccess }: MenuItemFormProps) {
                   step="0.01"
                   placeholder="8.00"
                   {...field}
-                  onChange={(e) =>
-                    field.onChange(e.target.value ? parseFloat(e.target.value) : 0)
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value === '') {
+                      field.onChange(undefined)
+                    } else {
+                      const parsed = parseFloat(value)
+                      field.onChange(isNaN(parsed) ? undefined : parsed)
+                    }
+                  }}
                   disabled={isSubmitting}
                   className="text-right"
                 />
@@ -144,9 +150,14 @@ export function MenuItemForm({ defaultValues, onSuccess }: MenuItemFormProps) {
         />
 
         <div className="flex gap-2 justify-start pt-4">
-          <Button type="submit" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            aria-label={isEdit ? 'עדכן פריט' : 'שמור פריט חדש'}
+            className="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
             {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
-            {isSubmitting ? 'שומר...' : isEdit ? 'עדכן' : 'שמור'}
+            {isSubmitting ? (isEdit ? 'מעדכן...' : 'שומר...') : isEdit ? 'עדכן' : 'שמור'}
           </Button>
         </div>
       </form>

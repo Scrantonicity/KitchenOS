@@ -8,22 +8,24 @@ import { z } from 'zod'
  * - unit_type: Either 'unit' (countable) or 'weight' (sold by kg)
  * - price_per_unit: Positive number with max 2 decimal places
  * - is_active: Optional boolean, defaults to true
+ *
+ * All error messages in Hebrew for user-facing validation
  */
 export const dishSchema = z.object({
   name: z
     .string()
-    .min(1, 'Dish name is required')
-    .max(100, 'Dish name must be at most 100 characters'),
+    .min(1, 'שם הפריט הוא שדה חובה')
+    .max(100, 'שם הפריט חייב להיות עד 100 תווים'),
 
   unit_type: z.enum(['unit', 'weight'], {
-    message: 'Unit type must be either "unit" or "weight"'
+    message: 'יש לבחור סוג יחידה'
   }),
 
   price_per_unit: z
-    .number()
-    .positive('Price must be positive')
-    .multipleOf(0.01, 'Price can have at most 2 decimal places')
-    .max(999999.99, 'Price is too large'),
+    .number({ message: 'מחיר חייב להיות מספר' })
+    .positive('המחיר חייב להיות מספר חיובי')
+    .multipleOf(0.01, 'המחיר יכול לכלול עד 2 ספרות אחרי הנקודה')
+    .max(999999.99, 'המחיר גבוה מדי'),
 
   is_active: z
     .boolean()

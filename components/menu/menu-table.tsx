@@ -76,7 +76,12 @@ export function MenuTable({ initialData }: MenuTableProps) {
     <div dir="rtl">
       {/* Header with Add Button */}
       <div className="flex justify-between items-center mb-6">
-        <Button onClick={handleAddNew} size="lg">
+        <Button
+          onClick={handleAddNew}
+          size="lg"
+          aria-label="הוסף פריט חדש לתפריט"
+          className="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        >
           הוסף פריט חדש
         </Button>
       </div>
@@ -126,6 +131,8 @@ export function MenuTable({ initialData }: MenuTableProps) {
                       size="sm"
                       onClick={() => handleEdit(dish)}
                       disabled={!dish.is_active}
+                      aria-label={`ערוך ${dish.name}`}
+                      className="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     >
                       ערוך
                     </Button>
@@ -134,6 +141,8 @@ export function MenuTable({ initialData }: MenuTableProps) {
                         variant="destructive"
                         size="sm"
                         onClick={() => setItemToDeactivate(dish.id)}
+                        aria-label={`השבת ${dish.name}`}
+                        className="focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                       >
                         השבת
                       </Button>

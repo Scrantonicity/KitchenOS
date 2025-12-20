@@ -17,7 +17,21 @@ export default async function MenuPage() {
     .order('name')
 
   if (error) {
-    console.error('Error fetching menu items:', error)
+    return (
+      <div dir="rtl" lang="he" className="container mx-auto p-8">
+        <h1 className="text-3xl font-bold text-right mb-6 text-red-600">
+          שגיאה בטעינת התפריט
+        </h1>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-right">
+          <p className="text-red-800 mb-2">
+            לא ניתן לטעון את פריטי התפריט מהמסד נתונים.
+          </p>
+          <p className="text-red-600 text-sm">
+            אנא בדוק את החיבור למסד הנתונים או נסה לרענן את הדף.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
