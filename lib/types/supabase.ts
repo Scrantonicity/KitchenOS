@@ -44,6 +44,84 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          id: string
+          order_number: number
+          customer_name: string
+          customer_phone: string | null
+          pickup_time: string
+          status: Database["public"]["Enums"]["order_status"]
+          source: Database["public"]["Enums"]["order_source"]
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          order_number?: never
+          customer_name: string
+          customer_phone?: string | null
+          pickup_time: string
+          status?: Database["public"]["Enums"]["order_status"]
+          source: Database["public"]["Enums"]["order_source"]
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          order_number?: never
+          customer_name?: string
+          customer_phone?: string | null
+          pickup_time?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          source?: Database["public"]["Enums"]["order_source"]
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          id: string
+          order_id: string
+          dish_id: string
+          quantity: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          order_id: string
+          dish_id: string
+          quantity: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          order_id?: string
+          dish_id?: string
+          quantity?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_dish_id_fkey"
+            columns: ["dish_id"]
+            isOneToOne: false
+            referencedRelation: "dishes"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -53,6 +131,8 @@ export type Database = {
     }
     Enums: {
       unit_type: "unit" | "weight"
+      order_status: "created" | "packing" | "ready" | "collected" | "cancelled" | "no_show"
+      order_source: "whatsapp" | "manual" | "email" | "phone"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -181,6 +261,8 @@ export const Constants = {
   public: {
     Enums: {
       unit_type: ["unit", "weight"],
+      order_status: ["created", "packing", "ready", "collected", "cancelled", "no_show"],
+      order_source: ["whatsapp", "manual", "email", "phone"],
     },
   },
 } as const

@@ -65,23 +65,23 @@ development_status:
       merged_at: "2025-12-19T12:30:00Z"
 
   1-3-build-desktop-menu-management-ui:
-    status: review
+    status: done
     git:
-      branch: "1/3-build-desktop-menu-management-ui"
-      commits: 2
+      branch: null  # Merged to main
+      commits: 4
       pr_url: null
-      last_commit_sha: "aa9ea47"
+      last_commit_sha: "ead979d"
       created_at: "2025-12-19T19:22:00Z"
-      merged_at: null
+      merged_at: "2025-12-20T00:00:00Z"
 
   1-4-create-orders-database-schema-and-manual-order-entry-api:
-    status: ready-for-dev
+    status: done
     git:
-      branch: null
-      commits: 0
+      branch: "1/4-create-orders-database-schema-and-manual-order-entry-api"
+      commits: 2
       pr_url: null
-      last_commit_sha: null
-      created_at: null
+      last_commit_sha: "68755d4"
+      created_at: "2025-12-20T00:10:00Z"
       merged_at: null
 
   1-5a-build-desktop-order-creation-form:
