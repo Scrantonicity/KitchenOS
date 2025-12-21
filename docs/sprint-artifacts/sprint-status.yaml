@@ -95,13 +95,13 @@ development_status:
       merged_at: "2025-12-21T08:00:00Z"
 
   1-5b-add-menu-item-selector-and-order-submission:
-    status: ready-for-dev
+    status: done
     git:
-      branch: null
-      commits: 0
+      branch: 1/5b-add-menu-item-selector-and-order-submission
+      commits: 1
       pr_url: null
-      last_commit_sha: null
-      created_at: null
+      last_commit_sha: "7a18ea0"
+      created_at: 2025-12-21T09:00:00Z
       merged_at: null
 
   1-6-build-tablet-kanban-order-display:
