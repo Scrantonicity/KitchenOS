@@ -16,7 +16,8 @@ export function useOrders() {
       if (!response.ok) {
         throw new Error('Failed to fetch orders')
       }
-      return response.json()
+      const json = await response.json()
+      return json.data // API wraps orders in { data: Order[] }
     },
     refetchInterval: REFRESH_INTERVAL,
     refetchOnWindowFocus: true,
