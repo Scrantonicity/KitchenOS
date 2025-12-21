@@ -11,7 +11,7 @@ export interface Order {
   notes: string | null
   created_at: string
   updated_at: string
-  items: OrderItem[]
+  order_items: OrderItem[] // API returns snake_case from database
 }
 
 export interface OrderItem {

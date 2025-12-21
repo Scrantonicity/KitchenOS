@@ -13,7 +13,7 @@ interface OrderCardProps {
 export function OrderCard({ order }: OrderCardProps) {
   const isUrgent = isOrderUrgent(order.pickup_time)
   const pickupTimeFormatted = format(new Date(order.pickup_time), 'HH:mm', { locale: he })
-  const itemCount = order.items?.length ?? 0 // Safe access in case items not loaded
+  const itemCount = order.order_items?.length ?? 0 // API returns order_items (snake_case)
 
   return (
     <div
