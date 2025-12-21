@@ -97,12 +97,12 @@ development_status:
   1-5b-add-menu-item-selector-and-order-submission:
     status: done
     git:
-      branch: 1/5b-add-menu-item-selector-and-order-submission
+      branch: null  # Merged to main
       commits: 1
       pr_url: null
-      last_commit_sha: "7a18ea0"
+      last_commit_sha: "f3eb7ad"
       created_at: 2025-12-21T09:00:00Z
-      merged_at: null
+      merged_at: "2025-12-21T16:45:00Z"
 
   1-6-build-tablet-kanban-order-display:
     status: backlog
