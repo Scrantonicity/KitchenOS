@@ -108,9 +108,9 @@ development_status:
     status: review
     git:
       branch: 1/6-build-tablet-kanban-order-display
-      commits: 5
-      pr_url: null
-      last_commit_sha: "ece15da"
+      commits: 6
+      pr_url: "https://github.com/Scrantonicity/KitchenOS/pull/2"
+      last_commit_sha: "7d1786e"
       created_at: 2025-12-21T17:00:00Z
       merged_at: null
 
