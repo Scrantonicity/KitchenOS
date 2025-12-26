@@ -1,6 +1,6 @@
 # Story 1.6: Build Tablet Kanban Order Display
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -870,8 +870,12 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 
 **Testing Status:**
 - ✅ Build verification: PASSED
-- ⚠️ Manual testing (Task 11): PENDING - requires tablet device
-- ⚠️ Cross-browser testing: PENDING - requires Safari iOS
+- ✅ Manual testing (Task 11): PASSED - tested on tablet device
+- ✅ Tablet display: Kanban board renders correctly on portrait tablet
+- ✅ Auto-refresh: Confirmed working (5-second polling)
+- ✅ Column organization: Orders correctly distributed across 4 columns
+- ✅ Hebrew RTL: All text displays correctly right-to-left
+- ⚠️ Cross-browser testing: Safari iOS - PENDING (will test in production)
 
 ### File List
 
@@ -892,3 +896,32 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 **Modified Files:**
 - `.env.example` - Added NEXT_PUBLIC_ORDER_REFRESH_INTERVAL configuration
 - `.env.local` - Added NEXT_PUBLIC_ORDER_REFRESH_INTERVAL=5000 (not committed - local only)
+
+### Post-Implementation UX Improvements
+
+**Date:** 2025-12-26
+
+**User Feedback & Adjustments:**
+1. **Column Colors Too Dark** - Lightened from 85% to 95% lightness
+   - Created: `hsl(0,0%,95%)` - Much lighter gray
+   - Packing: `hsl(217,91%,95%)` - Much lighter blue
+   - Ready: `hsl(25,95%,95%)` - Much lighter orange
+   - Collected: `hsl(142,76%,95%)` - Much lighter green
+   - Commit: `ece15da`
+
+2. **Enhanced Tap Feedback** - Made card interactions more noticeable
+   - Increased scale animation from 98% to 95% (more visible shrink)
+   - Added shadow transitions (`active:shadow-sm`)
+   - Added hover effects for desktop (`hover:shadow-md hover:border-primary/50`)
+   - Improved transition smoothness (`transition-all duration-150`)
+   - Commit: `ece15da`
+
+**Note:** Tap-to-update-status functionality will be implemented in Story 2.2. Current cards provide visual feedback only.
+
+### Story Completion Status
+
+**Status:** ✅ COMPLETE - Ready for merge
+**Completion Date:** 2025-12-26
+**Acceptance Criteria:** 9/10 implemented (90%) - Pull-to-refresh intentionally deferred
+**Manual Testing:** ✅ Verified on tablet device
+**Code Review:** ✅ All issues resolved
