@@ -6,14 +6,14 @@ import { OrderCardSkeleton } from './components/OrderCardSkeleton'
 import { useOrders } from '@/lib/hooks/useOrders'
 
 const SKELETON_COLUMNS = [
-  { status: 'created', title: 'נוצר', color: 'bg-[hsl(0,0%,85%)]' },
-  { status: 'packing', title: 'באריזה', color: 'bg-[hsl(217,91%,85%)]' },
-  { status: 'ready', title: 'מוכן', color: 'bg-[hsl(25,95%,85%)]' },
-  { status: 'collected', title: 'נאסף', color: 'bg-[hsl(142,76%,85%)]' },
+  { status: 'created', title: 'נוצר', color: 'bg-[hsl(0,0%,95%)]' },
+  { status: 'packing', title: 'באריזה', color: 'bg-[hsl(217,91%,95%)]' },
+  { status: 'ready', title: 'מוכן', color: 'bg-[hsl(25,95%,95%)]' },
+  { status: 'collected', title: 'נאסף', color: 'bg-[hsl(142,76%,95%)]' },
 ]
 
 export default function KitchenPage() {
-  const { data: orders = [], isLoading, error } = useOrders()
+  const { data: orders = [], isPending, error } = useOrders()
 
   if (error) {
     return (
@@ -29,7 +29,7 @@ export default function KitchenPage() {
     )
   }
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <>
         <LandscapeWarning />

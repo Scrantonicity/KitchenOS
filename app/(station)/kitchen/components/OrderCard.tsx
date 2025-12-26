@@ -22,7 +22,9 @@ export function OrderCard({ order }: OrderCardProps) {
         "min-h-[120px]", // Exceeds 44px touch target
         "p-4",
         "bg-card rounded-lg border",
-        "cursor-pointer transition-transform active:scale-[0.98]",
+        "cursor-pointer transition-all duration-150",
+        "active:scale-95 active:shadow-sm",
+        "hover:shadow-md hover:border-primary/50",
         isUrgent && "border-2 border-amber-500 bg-amber-50" // Urgency highlight
       )}
       dir="rtl"

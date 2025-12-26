@@ -10,10 +10,10 @@ interface KanbanBoardProps {
 }
 
 const STATUS_COLUMNS = [
-  { status: 'created' as const, title: 'נוצר', color: 'bg-[hsl(0,0%,85%)]' },
-  { status: 'packing' as const, title: 'באריזה', color: 'bg-[hsl(217,91%,85%)]' },
-  { status: 'ready' as const, title: 'מוכן', color: 'bg-[hsl(25,95%,85%)]' },
-  { status: 'collected' as const, title: 'נאסף', color: 'bg-[hsl(142,76%,85%)]' },
+  { status: 'created' as const, title: 'נוצר', color: 'bg-[hsl(0,0%,95%)]' },
+  { status: 'packing' as const, title: 'באריזה', color: 'bg-[hsl(217,91%,95%)]' },
+  { status: 'ready' as const, title: 'מוכן', color: 'bg-[hsl(25,95%,95%)]' },
+  { status: 'collected' as const, title: 'נאסף', color: 'bg-[hsl(142,76%,95%)]' },
 ]
 
 export function KanbanBoard({ orders }: KanbanBoardProps) {
